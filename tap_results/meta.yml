@@ -1,0 +1,10 @@
+---
+file_attributes:
+  -
+    description: sql/promscale_demo.sql
+    end_time: 1649793147.98951
+    start_time: 1649793143.73087
+file_order:
+  - sql/promscale_demo.sql
+start_time: 1649793143
+stop_time: 1649793147

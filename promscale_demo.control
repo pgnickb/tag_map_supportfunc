@@ -1,0 +1,4 @@
+# promscale_demo extension
+comment = 'promscale_demo - creates a sample table and implements the get_or_create_position_for_key function'
+default_version = '1.0'
+relocatable = true
