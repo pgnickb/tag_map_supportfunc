@@ -21,3 +21,5 @@ CREATE TABLE _ps_trace.map
 (
     map       ps_trace.tag_map
 );
+
+CREATE INDEX ON _ps_trace.map USING gin(map);

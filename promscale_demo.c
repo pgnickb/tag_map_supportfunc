@@ -52,9 +52,11 @@ tag_map_support(PG_FUNCTION_ARGS)
 							/* Get what would be our target column */
 							Node 		*denormalizeFuncArg  = linitial(denormalizeFunc->args);
 							FuncExpr    *containsExpr;
+							OpExpr      *containsOpExpr;
 							FuncExpr    *findLabelsExpr;
 							FuncDetailCode fdContains;
 							Oid			jsonbContainsFuncOID;
+							Oid			jsonbContainsOpOID;
 							Oid			findLabelsFuncOID;
 							Oid			jsonbContainsFuncRetTypeOID;
 							Oid			findLabelsFuncRetTypeOID;
@@ -93,6 +95,11 @@ tag_map_support(PG_FUNCTION_ARGS)
 							if (fdContains != FUNCDETAIL_NORMAL)
 								elog(ERROR, "Something is wrong with \"%s\" function", FIND_LABELS_FUNC_NAME);
 
+							jsonbContainsOpOID = LookupOperName(NULL, list_make2(
+									makeString(SCHEMA_PG_CATALOG),
+									makeString(JSONB_CONTAINS_OP_NAME)), JSONBOID, JSONBOID,
+						  		RAISE_ERROR_IF_NOT_FOUND, -1);
+
 							findLabelsExpr = makeFuncExpr(findLabelsFuncOID, findLabelsFuncRetTypeOID,
 								findLabelFuncArgs, fcinfo->fncollation,
 								fcinfo->fncollation, COERCE_EXPLICIT_CALL);
@@ -103,9 +110,13 @@ tag_map_support(PG_FUNCTION_ARGS)
 								containsFuncArgs, fcinfo->fncollation,
 								fcinfo->fncollation, COERCE_EXPLICIT_CALL);
 
+							containsOpExpr = make_opclause(jsonbContainsOpOID, BOOLOID, false,
+								denormalizeFuncArg, findLabelsExpr, fcinfo->fncollation,
+								fcinfo->fncollation);
+
 							// Expr *new = make_orclause(quals);
 							// new = eval_const_expressions(req->root, new);
-							PG_RETURN_POINTER(containsExpr);
+							PG_RETURN_POINTER(containsOpExpr);
 						}
 					}
 				}

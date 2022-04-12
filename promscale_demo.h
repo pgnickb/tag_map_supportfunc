@@ -20,6 +20,7 @@
 #include "optimizer/optimizer.h"
 #include "parser/parse_func.h"
 #include "parser/parse_node.h"
+#include "parser/parse_oper.h"
 #include "utils/builtins.h"
 #include "utils/date.h"
 #include "utils/datetime.h"
@@ -38,5 +39,8 @@
 #define DENORMALIZE_FUNC_NAME       "tag_map_denormalize"
 #define FIND_LABELS_FUNC_NAME       "find_label_ids"
 #define JSONB_CONTAINS_FUNC_NAME    "jsonb_contains"
+#define JSONB_CONTAINS_OP_NAME      "@>"
+
+#define RAISE_ERROR_IF_NOT_FOUND    true
 
 #endif /* PROMSCALE_DEMO_H */
