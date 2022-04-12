@@ -27,7 +27,7 @@ tag_map_support(PG_FUNCTION_ARGS)
 			Node *eqOpArgLeft  = linitial(eqFunc->args); /* arrow func */
 			Node *eqOpArgRight = lsecond (eqFunc->args); /* jsonb value */
 
-			// elog_node_display(WARNING, "Expr node", expr, true);
+			elog_node_display(DEBUG1, "Original root", eqFunc, true);
 
 			if (IsA(eqOpArgLeft, OpExpr))
 			{
@@ -40,8 +40,6 @@ tag_map_support(PG_FUNCTION_ARGS)
 					Node *arrowOpArgLeft  = linitial(arrowOp->args); /* Denormalize func */
 					Node *arrowOpArgRight = lsecond (arrowOp->args); /* Label text */
 
-					// elog_node_display(WARNING, "arrowOpArgLeft node", arrowOpArgLeft, true);
-
 					if (IsA(arrowOpArgLeft, FuncExpr))
 					{
 						FuncExpr *denormalizeFunc = (FuncExpr *) arrowOpArgLeft;
@@ -49,16 +47,14 @@ tag_map_support(PG_FUNCTION_ARGS)
 
 						if (strcmp(denormalizeFuncName, DENORMALIZE_FUNC_NAME) == 0)
 						{
+							/* We're all set. Build the new execution plan: */
 							/* Get what would be our target column */
 							Node 		*denormalizeFuncArg  = linitial(denormalizeFunc->args);
-							FuncExpr    *containsExpr;
-							OpExpr      *containsOpExpr;
+							Expr        *containsOpExpr;
 							FuncExpr    *findLabelsExpr;
-							FuncDetailCode fdContains;
-							Oid			jsonbContainsFuncOID;
+							FuncDetailCode fd;
 							Oid			jsonbContainsOpOID;
 							Oid			findLabelsFuncOID;
-							Oid			jsonbContainsFuncRetTypeOID;
 							Oid			findLabelsFuncRetTypeOID;
 							bool		p_retset;
 							int			p_nvargs;
@@ -66,24 +62,10 @@ tag_map_support(PG_FUNCTION_ARGS)
 							Oid		   *p_true_typeids;
 							/* make a list of arguments for find_label_ids func */
 							List *findLabelFuncArgs = list_make2(arrowOpArgRight, eqOpArgRight);
-							List *containsFuncArgs;
-							// List *argnames = list_make2();
-							Oid jsonbContainsFuncArgTypes[] = {JSONBOID, JSONBOID};
 							Oid findLabelsFuncArgTypes[]    = {TEXTOID,  JSONBOID};
 
-							fdContains = func_get_detail(list_make2(
-										makeString(SCHEMA_PG_CATALOG),
-										makeString(JSONB_CONTAINS_FUNC_NAME)),
-													NIL, NIL, 2, jsonbContainsFuncArgTypes,
-													false, false, false,
-													&jsonbContainsFuncOID, &jsonbContainsFuncRetTypeOID,
-													&p_retset, &p_nvargs, &p_vatype,
-													&p_true_typeids, NULL);
-
-							if (fdContains != FUNCDETAIL_NORMAL)
-								elog(ERROR, "Something is wrong with \"%s\" function", JSONB_CONTAINS_FUNC_NAME);
-
-							fdContains = func_get_detail(list_make2(
+							/* Locate the find_label_ids function */
+							fd = func_get_detail(list_make2(
 										makeString(SCHEMA_PS_TRACE_INTERNAL),
 										makeString(FIND_LABELS_FUNC_NAME)),
 													NIL, NIL, 2, findLabelsFuncArgTypes,
@@ -92,30 +74,27 @@ tag_map_support(PG_FUNCTION_ARGS)
 													&p_retset, &p_nvargs, &p_vatype,
 													&p_true_typeids, NULL);
 
-							if (fdContains != FUNCDETAIL_NORMAL)
+							if (fd != FUNCDETAIL_NORMAL)
 								elog(ERROR, "Something is wrong with \"%s\" function", FIND_LABELS_FUNC_NAME);
 
+							/* Locate @> jsonb operator */
 							jsonbContainsOpOID = LookupOperName(NULL, list_make2(
 									makeString(SCHEMA_PG_CATALOG),
 									makeString(JSONB_CONTAINS_OP_NAME)), JSONBOID, JSONBOID,
 						  		RAISE_ERROR_IF_NOT_FOUND, -1);
 
+							/* Make a planner node for a function call */
 							findLabelsExpr = makeFuncExpr(findLabelsFuncOID, findLabelsFuncRetTypeOID,
 								findLabelFuncArgs, fcinfo->fncollation,
 								fcinfo->fncollation, COERCE_EXPLICIT_CALL);
 
-							containsFuncArgs = list_make2(denormalizeFuncArg, findLabelsExpr);
-
-							containsExpr = makeFuncExpr(jsonbContainsFuncOID, jsonbContainsFuncRetTypeOID,
-								containsFuncArgs, fcinfo->fncollation,
-								fcinfo->fncollation, COERCE_EXPLICIT_CALL);
-
+							/* Make a planner node for the operator (this is our new root) */
 							containsOpExpr = make_opclause(jsonbContainsOpOID, BOOLOID, false,
-								denormalizeFuncArg, findLabelsExpr, fcinfo->fncollation,
+								(Expr *) denormalizeFuncArg, (Expr *) findLabelsExpr, fcinfo->fncollation,
 								fcinfo->fncollation);
 
-							// Expr *new = make_orclause(quals);
-							// new = eval_const_expressions(req->root, new);
+							elog_node_display(DEBUG1, "New root", containsOpExpr, true);
+
 							PG_RETURN_POINTER(containsOpExpr);
 						}
 					}
