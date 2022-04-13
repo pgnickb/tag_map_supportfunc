@@ -16,7 +16,7 @@ tag_map_support(PG_FUNCTION_ARGS)
         }
         else /* Solely to suppress warning about mixed declarations and code */
         {
-            FuncExpr   *eqFunc = req->fcall;
+            FuncExpr *eqFunc = req->fcall;
             Node *eqOpArgLeft  = linitial(eqFunc->args); /* arrow func */
             Node *eqOpArgRight = lsecond (eqFunc->args); /* jsonb value */
 
@@ -42,7 +42,7 @@ tag_map_support(PG_FUNCTION_ARGS)
                         {
                             /* We're all set. Build the new execution plan: */
                             /* Get what would be our target column */
-                            Node        *denormalizeFuncArg  = linitial(denormalizeFunc->args);
+                            Node        *denormalizeFuncArg = linitial(denormalizeFunc->args);
                             Expr        *containsOpExpr;
                             FuncExpr    *findLabelsExpr;
                             FuncDetailCode fd;
@@ -55,7 +55,7 @@ tag_map_support(PG_FUNCTION_ARGS)
                             Oid         *p_true_typeids;
                             /* Make a list of arguments for find_label_ids func */
                             List *findLabelFuncArgs = list_make2(arrowOpArgRight, eqOpArgRight);
-                            Oid findLabelsFuncArgTypes[]    = {TEXTOID,  JSONBOID};
+                            Oid findLabelsFuncArgTypes[] = {TEXTOID,  JSONBOID};
 
                             /* Locate the find_label_ids function */
                             fd = func_get_detail(list_make2(
