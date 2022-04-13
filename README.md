@@ -7,6 +7,7 @@ Considerations:
 if the user ends up issuing `->` operator while `ps_trace` schema isn't path of their `search_path`, then `_ps_trace.tag_map` will be implicitly cast into `jsonb` and the built-in `->` will be used, which will result in extremely poor performance.
 
 2. We have several options regarding how we want our custom nodes to look in the plan output:
+```C
 typedef enum CoercionForm
 {
 	COERCE_EXPLICIT_CALL,		/* display as a function call */
@@ -14,7 +15,8 @@ typedef enum CoercionForm
 	COERCE_IMPLICIT_CAST,		/* implicit cast, so hide it */
 	COERCE_SQL_SYNTAX			/* display with SQL-mandated special syntax */
 } CoercionForm;
-For now I've decided to stick with COERCE_EXPLICIT_CALL
+```
+For now I've decided to stick with `COERCE_EXPLICIT_CALL`
 
 
 notes:
