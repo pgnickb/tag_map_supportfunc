@@ -209,6 +209,8 @@ CREATE TABLE _ps_trace.map
 (
     map       ps_trace.tag_map
 );
+
+CREATE INDEX ON _ps_trace.map USING gin(map);
 /* src/sql/10_functions.sql */
 
 CREATE FUNCTION _ps_trace.tag_map_support(internal)

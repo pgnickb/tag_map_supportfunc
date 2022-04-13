@@ -60,7 +60,7 @@ tag_map_support(PG_FUNCTION_ARGS)
 							int			p_nvargs;
 							Oid			p_vatype;
 							Oid		   *p_true_typeids;
-							/* make a list of arguments for find_label_ids func */
+							/* Make a list of arguments for find_label_ids func */
 							List *findLabelFuncArgs = list_make2(arrowOpArgRight, eqOpArgRight);
 							Oid findLabelsFuncArgTypes[]    = {TEXTOID,  JSONBOID};
 
