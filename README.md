@@ -10,10 +10,10 @@ if the user ends up issuing `->` operator while `ps_trace` schema isn't path of 
 ```C
 typedef enum CoercionForm
 {
-	COERCE_EXPLICIT_CALL,		/* display as a function call */
-	COERCE_EXPLICIT_CAST,		/* display as an explicit cast */
-	COERCE_IMPLICIT_CAST,		/* implicit cast, so hide it */
-	COERCE_SQL_SYNTAX			/* display with SQL-mandated special syntax */
+    COERCE_EXPLICIT_CALL,       /* display as a function call */
+    COERCE_EXPLICIT_CAST,       /* display as an explicit cast */
+    COERCE_IMPLICIT_CAST,       /* implicit cast, so hide it */
+    COERCE_SQL_SYNTAX           /* display with SQL-mandated special syntax */
 } CoercionForm;
 ```
 For now I've decided to stick with `COERCE_EXPLICIT_CALL`

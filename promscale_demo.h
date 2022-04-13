@@ -32,6 +32,10 @@
 #include "utils/syscache.h"
 #include "utils/typcache.h"
 
+PG_MODULE_MAGIC;
+Datum tag_map_support(PG_FUNCTION_ARGS);
+PG_FUNCTION_INFO_V1(tag_map_support);
+
 #define SCHEMA_PG_CATALOG           "pg_catalog"
 #define SCHEMA_PS_TRACE_INTERNAL    "_ps_trace"
 #define SCHEMA_PS_TRACE             "ps_trace"
